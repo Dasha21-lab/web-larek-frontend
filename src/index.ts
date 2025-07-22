@@ -1,151 +1,129 @@
-import { EventEmitter } from './components/base/events';
+import { EventEmitter, IEvents } from './components/base/events';
 // import { ICard } from './types/index';
 import './scss/styles.scss';
 
-// interface IBasketModel {
-//     items: Map<string, number>;
-//     add(id: string): void;
-//     remove(id: string): void;
-// }
+export interface ICard {
+    id: string;
+    description?: string;
+    image: string;
+    title: string;
+    category: string;
+    price: number | null;
+}
 
-// interface IEventEmitter {
-//     emit: (event: string, data: unknown) => void;
-// }
+export interface ICardsData {
+    cards: ICard[];
+    preview: string | null;
+    updateCard(card: ICard, payload: Function | null): void;
+    getCard(cardId: string): ICard;
+}
 
-// class BasketModel implements IBasketModel {
-//     items: Map<string, number> = new Map();
+export class CardData implements ICardsData {
+    protected _cards: ICard[] = [];
+    protected _preview: string | null = null;
+    protected events: IEvents;
 
-//     constructor(protected events: IEventEmitter) {}
+    constructor(events: IEvents) {
+        this.events = events;
+    }
 
-//     add(id: string): void {
-//         if (!this.items.has(id)) this.items.set(id, 0);
-//         this.items.set(id, this.items.get(id)! + 1);
+    set cards(cards: ICard[]) {
+        this._cards = cards;
+        this.events.emit('cards:changed');
+    }
 
-//         this._changed();
-//     }
+    get cards() {
+        return this._cards;
+    }
 
-//     remove(id: string): void {
-//         if (!this.items.has(id)) return;
-//         if (this.items.get(id)! > 0) {
-//             this.items.set(id, this.items.get(id)! - 1);
-//             if (this.items.get(id) === 0) this.items.delete(id);
-//         }
+    addCard(card: ICard) {
+        this._cards.push(card);
+        this.events.emit('cards:changed');
+    }
 
-//         this._changed();
-//     }
+    updateCard(card: ICard, payload: Function | null = null) {
+        const foundCard = this._cards.find((item) => item.id === card.id);
+        if (!foundCard) {
+            this.addCard(card);
+        } else {
+            Object.assign(foundCard, card);
+        }
+        payload?.();
+        this.events.emit('cards:changed');
+    }
 
-//     protected _changed() {
-//         this.events.emit('basket:change', { 
-//             items: Array.from(this.items.keys()) 
-//         });
-//     }
-// }
+    getCard(cardId: string): ICard | undefined {
+        return this._cards.find((item) => item.id === cardId);
+    }
 
-// const events = new EventEmitter();
+    set preview(cardId: string | null) {
+        if (!cardId) {
+            this._preview = null;
+            return;
+        }
+        const selectedCard = this.getCard(cardId);
+        if (selectedCard) {
+            this._preview = cardId;
+            this.events.emit('card:selected');
+        }
+    }
 
-// const basket = new BasketModel(events);
+    get preview() {
+        return this._preview;
+    }
+}
 
-// events.on('basket:change', (data: { items: string[] }) => {
-    
-// });
+const events: IEvents = new EventEmitter();
 
-// interface ICard {
-//     id: string;
-//     title: string;
-// }
+const cardsData = new CardData(events);
 
-// interface ICatalogModel {
-//     items: ICard[];
-//     setItems(items: ICard[]): void;
-//     getProduct(id: string): ICard;
-// }
+const test = {
+    "items": [
+        {
+            "id": "854cef69-976d-4c2a-a18c-2aa45046c390",
+            "description": "Если планируете решать задачи в тренажёре, берите два.",
+            "image": "/5_Dots.svg",
+            "title": "+1 час в сутках",
+            "category": "софт-скил",
+            "price": 750
+        },
+        {
+            "id": "c101ab44-ed99-4a54-990d-47aa2bb4e7d9",
+            "description": "Лизните этот леденец, чтобы мгновенно запоминать и узнавать любой цветовой код CSS.",
+            "image": "/Shell.svg",
+            "title": "HEX-леденец",
+            "category": "другое",
+            "price": 1450
+        },
+        {
+            "id": "b06cde61-912f-4663-9751-09956c0eed67",
+            "description": "Будет стоять над душой и не давать прокрастинировать.",
+            "image": "/Asterisk_2.svg",
+            "title": "Мамка-таймер",
+            "category": "софт-скил",
+            "price": null
+        },
+        {
+            "id": "412bcf81-7e75-4e70-bdb9-d3c73c9803b7",
+            "description": "Откройте эти куки, чтобы узнать, какой фреймворк вы должны изучить дальше.",
+            "image": "/Soft_Flower.svg",
+            "title": "Фреймворк куки судьбы",
+            "category": "дополнительное",
+            "price": 2500
+        },
+        {
+            "id": "1c521d84-c48d-48fa-8cfb-9d911fa515fd",
+            "description": "Если орёт кот, нажмите кнопку.",
+            "image": "/mute-cat.svg",
+            "title": "Кнопка «Замьютить кота»",
+            "category": "кнопка",
+            "price": 2000
+        }
+    ]
+}
 
-// Интерфейс католога 
+cardsData.cards = test.items;
 
-// interface IViewConstructor {
-//     new (container: HTMLElement, events?: IEventEmitter): IView;
-// }
+console.log(cardsData.getCard("854cef69-976d-4c2a-a18c-2aa45046c390"))
 
-// interface IView {
-//     render(deta?: object): HTMLElement;
-// }
 
-// class BasketItemView implements IView {
-//     protected title: HTMLSpanElement;
-//     protected addButton: HTMLButtonElement;
-//     protected removeButton: HTMLButtonElement;
-
-//     protected id: string | null = null;
-
-//     constructor(protected container: HTMLElement, protected events: IEventEmitter) {
-//         this.title = container.querySelector('.basket-item__title') as HTMLSpanElement;
-//         this.addButton = container.querySelector('.basket-item__add') as HTMLButtonElement;
-//         this.removeButton = container.querySelector('.basket-item__remove') as HTMLButtonElement;
-
-//         this.addButton.addEventListener('click', () => {
-//             this.events.emit('ui:basket-add', { id: this.id });
-//         });
-
-//         this.removeButton.addEventListener('click', () => {
-//              this.events.emit('ui:basket-remove', { id: this.id });
-//         });
-//     }
-
-//     render(data: { id: string, title: string }) {
-//         if (data) {
-//             this.id = data.id;
-//             this.title.textContent = data.title;
-//         }
-//         return this.container;
-//     }
-// }
-
-// class BasketView implements IView {
-//     constructor(protected container: HTMLElement) {}
-//     render(data: { items: HTMLElement[] }) {
-//         if(data) {
-//             this.container.replaceChildren(...data.items);
-//         }
-//         return this.container;
-//     }
-// }
-
-// const api = new ShopAPI();
-// const basketView = new BasketView(document.querySelector('.basket'));
-// const basketModel = new BasketModel(events);
-// const catalogModel = new ICatalogModel(events);
-
-// // function renderBasket(items: string[]) {
-// //     basketView.render(
-// //         items.map(id => {
-// //             const itemView = new BasketItemView(events);
-// //             return itemView.render(catalogModel.getProduct(id));
-// //         })
-// //     );
-// // }
-
-// function renderBasket(items: string[]) {
-//     const container = document.createElement('div');
-//     basketView.render({
-//         items: items.map(id => {
-//             const itemView = new BasketItemView(container, events);
-//             return itemView.render(catalogModel.getProduct(id));
-//         })
-//     });
-// }
-
-// events.on('basket:change', (event: { items: string[] }) => {
-//     renderBasket(event.items);
-// });
-
-// events.on('ui:basket-add', (event: { items: string }) => {
-//     basketModel.add(event.items);
-// });
-
-// events.on('ui:basket-remove', (event: { items: string }) => {
-//     basketModel.remove(event.items);
-// });
-
-// api.getCatalog()
-//     .then(catalogModel.setItems.bind(catalogModel))
-//     .catch(err => console.error(err));

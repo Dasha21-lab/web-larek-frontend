@@ -23,7 +23,7 @@ const config = {
   devServer: {
     open: true,
     host: "localhost",
-    watchFiles: ["src/pages/*.html"],
+    watchFiles: ["src/**/*.ts", "src/pages/*.html"],
     hot: true
   },
   plugins: [
@@ -32,7 +32,7 @@ const config = {
     }),
 
     new MiniCssExtractPlugin(),
-
+  
     // Add your plugins here
     // Learn more about plugins from https://webpack.js.org/configuration/plugins/
     new DefinePlugin({
