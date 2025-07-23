@@ -1,6 +1,22 @@
 import { API_URL } from "../utils/constants";
-ЫСМЦУКЕ
-// // Интерфейс карточки
+
+export interface ICard {
+    id: string;
+    description?: string;
+    image: string;
+    title: string;
+    category: string;
+    price: number | null;
+}
+
+export interface ICardsData {
+    cards: ICard[];
+    preview: string | null;
+    updateCard(card: ICard, payload: Function | null): void;
+    getCard(cardId: string): ICard;
+}
+
+// Интерфейс карточки
 // export interface ICard {
 //     id: string;
 //     description?: string;
@@ -10,7 +26,7 @@ import { API_URL } from "../utils/constants";
 //     price: number | null;
 // }
 
-// // Интерфейс карточки с выделение одной
+// Интерфейс карточки с выделение одной
 // export interface ICardsData {
 //     card: ICard[];
 //     preview: string | null;
@@ -21,44 +37,51 @@ import { API_URL } from "../utils/constants";
 //     totalCard(): void;
 // }
 
-// // export interface ICardsData
+// export interface ICardsData
 
 
-// // производный тип способ оплаты
-// export type PaymentMethod = 'online' | 'upon receipt';
+// производный тип способ оплаты
+export type PaymentMethod = 'online' | 'upon receipt';
 
-// // Интерфейс модального окна оплаты
-// export interface IDelivery {
-//     payment: PaymentMethod;
-//     address: string;
-// }
+// Интерфейс модального окна оплаты
+export interface IDelivery {
+    payment: PaymentMethod;
+    address: string;
+}
 
-// // Интерфейс модального окна контактов
-// export interface IContact {
-//     email: string;
-//     phone: string;
-// }
+// Интерфейс модального окна контактов
+export interface IContact {
+    email: string;
+    phone: string;
+}
 
-// // Интерфейс модального окна заказ оформлен
-// export interface IOrderResult {
-//     id: string;
-//     total: number;
-// }
+// Интерфейс модального окна заказ оформлен
+export interface IOrderResult {
+    id: string;
+    total: number;
+}
 
-// // производный тип оплаты и контактов
-// export type UserData = IDelivery & IContact;
+// производный тип оплаты и контактов
+export type UserData = IDelivery & IContact;
 
-// // производный тип форм оплаты и контактов
-// export type OrderForm = Pick<UserData, 'address' | 'email' | 'phone'>
+// производный тип форм оплаты и контактов
+export type OrderForm = Pick<UserData, 'address' | 'email' | 'phone'>
 
-// // Интерфейс модального окна контактов
-// export interface IOrder extends Pick<UserData, 'address' | 'email' | 'phone'> {
-//     items: string[];
-// }
+// Интерфейс модального окна контактов
+export interface IOrder extends Pick<UserData, 'address' | 'email' | 'phone'> {
+    items: string[];
+}
 
-// // производный тип объекта для хранения ошибок валидации формы
-// export type FormErrors = Partial<Record<keyof IOrder, string>>;
+// производный тип объекта для хранения ошибок валидации формы
+export type FormErrors = Partial<Record<keyof IOrder, string>>;
 
-// // производный тип товара в карзине
-// export type CardBasket = Pick<ICard, 'id' | 'title' | 'price'>
+// производный тип товара в карзине
+export type CardBasket = Pick<ICard, 'id' | 'title' | 'price'>
 
+export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
+
+export interface IShopApi {
+    baseUrl: string;
+    get<T>(uri: string): Promise<T>;
+    post<T>(uri: string, data: object, method?: ApiPostMethods): Promise<T>;
+}
