@@ -7,6 +7,7 @@ export class ShopApi {
         this._baseApi = baseApi;
     }
 
+    
     getCardList(): Promise<ICard[]> {
         return this._baseApi.get<ICard[]>(`/product`)
             .then((items: ICard[]) => items);

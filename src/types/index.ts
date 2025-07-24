@@ -9,43 +9,29 @@ export interface ICard {
     price: number | null;
 }
 
-export interface ICardsData {
-    cards: ICard[];
-    preview: string | null;
-    updateCard(card: ICard, payload: Function | null): void;
-    getCard(cardId: string): ICard;
+export interface ICards {
+    item: ICard[]
 }
 
-// Интерфейс карточки
-// export interface ICard {
-//     id: string;
-//     description?: string;
-//     image: string;
-//     title: string;
-//     category: string;
-//     price: number | null;
-// }
+export interface IShopsData {
+    cards: ICard[];
+    basket: string[];
+    preview: string | null;
+    order: IOrder | null;
+    getCard(cardId: string): ICard;
+    setCard(items: ICard[]): void;
+    addBasket(cardId: string): void;
+    removeBasket(cardId: string): void;
+    setOrderField(field: keyof OrderField, value: string): void;
+    getTotal?(): number;
+}
 
-// Интерфейс карточки с выделение одной
-// export interface ICardsData {
-//     card: ICard[];
-//     preview: string | null;
-//     addCard(card: ICard): void;
-//     deleteCard(cardId: string, payload: Function | null): void;
-//     updateCard(card: ICard, payload: Function | null): void;
-//     getCard(cardId: string): ICard;
-//     totalCard(): void;
-// }
-
-// export interface ICardsData
-
-
-// производный тип способ оплаты
-export type PaymentMethod = 'online' | 'upon receipt';
+// // производный тип способ оплаты
+// export type PaymentMethod = 'online' | 'upon receipt';
 
 // Интерфейс модального окна оплаты
 export interface IDelivery {
-    payment: PaymentMethod;
+    payment: string;
     address: string;
 }
 
@@ -62,14 +48,14 @@ export interface IOrderResult {
 }
 
 // производный тип оплаты и контактов
-export type UserData = IDelivery & IContact;
+export type OrderField = IDelivery & IContact;
 
-// производный тип форм оплаты и контактов
-export type OrderForm = Pick<UserData, 'address' | 'email' | 'phone'>
+// // производный тип форм оплаты и контактов
+// export type OrderForm = Pick<UserData, 'address' | 'email' | 'phone'>
 
 // Интерфейс модального окна контактов
-export interface IOrder extends Pick<UserData, 'address' | 'email' | 'phone'> {
-    items: string[];
+export interface IOrder extends OrderField {
+    items: string[]
 }
 
 // производный тип объекта для хранения ошибок валидации формы

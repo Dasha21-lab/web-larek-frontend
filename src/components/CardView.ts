@@ -3,7 +3,6 @@ import { ICard } from '../types/index';
 import { Component } from '../components/base/Component';
 import { cloneTemplate, ensureElement } from '../utils/utils'
 
-
 export class Card extends Component<ICard> {
     protected container: HTMLElement;
     protected events: IEvents;
@@ -15,9 +14,9 @@ export class Card extends Component<ICard> {
     protected cardButton?: HTMLButtonElement;
     protected cardPrice: HTMLElement;
 
-    constructor(protected blockName: string, container: HTMLElement) {
+    constructor(protected blockName: string, container: HTMLTemplateElement, events: IEvents) {
         super(container);
-    
+        this.events = events;
 
         this.cardImage = ensureElement<HTMLImageElement>(`.${blockName}__image`, container);
         this.cardTitle = ensureElement<HTMLElement>(`.${blockName}__title`, container);
@@ -26,9 +25,11 @@ export class Card extends Component<ICard> {
         this.cardButton = container.querySelector('.button');
         this.cardPrice = ensureElement<HTMLElement>(`.${blockName}__price`, container);
 
-        this.cardButton.addEventListener('click', () =>
-            this.events.emit('card:select', { card: this })
-        )
+         if (this.cardButton) {
+            this.cardButton.addEventListener('click', () =>
+                this.events.emit('card:select', { card: this })
+            );
+        }
     }
 
     set id(value: string) {
@@ -53,11 +54,15 @@ export class Card extends Component<ICard> {
     }
 
     set description(value: string) {
-        this.setText(this.cardDescription, value);
+        if (this.cardDescription) {
+            this.setText(this.cardDescription, value);
+        }
     }
 
     set category(value: string) {
-        this.setText(this.cardCategory, value);
+       if (this.cardCategory) {
+            this.setText(this.cardCategory, value);
+        }
     }
     
     get category(): string {
@@ -75,6 +80,8 @@ export class Card extends Component<ICard> {
     }
 
     protected updateButton(enabled: boolean, text: string) {
+         if (!this.cardButton) return;
+
         this.setText(this.cardButton, text);
         this.setEnabled(this.cardButton, !enabled);
             
@@ -82,7 +89,10 @@ export class Card extends Component<ICard> {
     }
 
     get price(): number | null {
-        return +this.cardPrice?.textContent || 0;
+        const text = this.cardPrice?.textContent;
+        if (text === 'Бесценно') return null;
+        return Number(text?.replace(' синапсов', '')) || null;
     }
 }
+
 
