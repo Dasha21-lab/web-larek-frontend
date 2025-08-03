@@ -1,15 +1,22 @@
-import { IOrder } from "../types";
+import { IDelivery, IContact  } from "../types";
+import { ensureElement } from "../utils/utils";
 import { IEvents } from "./base/events";
 import { Form } from "./Form";
 
-export class Order extends Form<IOrder> {
-    protected paymentButtons?: HTMLButtonElement[];
+export class Delivery extends Form<IDelivery> {
+    protected paymentButtons: HTMLButtonElement[];
+    protected _button: HTMLButtonElement;
 
     constructor(container: HTMLFormElement, events: IEvents) {
         super(container, events);
 
         this.paymentButtons = Array.from(this.container.querySelectorAll('.button_alt')) as HTMLButtonElement[];
-        
+        this._button = ensureElement<HTMLButtonElement>('.order__button', this.container);
+        if (this._button) {
+            this._button.addEventListener('click', () => {
+                events.emit('contacts:open');
+            });
+        };
         this.paymentButtons.forEach(button => {
             button.addEventListener('click', () => {
                 this.payment = button.name;
@@ -19,16 +26,29 @@ export class Order extends Form<IOrder> {
     }
 
     set payment(name: string) {
-        console.log(name)
         this.paymentButtons.forEach(button => {
              const isActive = button.name === name;
             this.toggleClass(button, 'button_alt-active', isActive);
             button.ariaPressed = String(isActive);
         });
     }
-
+    
     set address(value: string) {
         (this.container.elements.namedItem('address') as HTMLInputElement).value = value;
+    }
+}
+
+export class Contact extends Form<IContact> {
+    protected _button: HTMLButtonElement;
+
+    constructor(container: HTMLFormElement, events: IEvents) {
+        super(container, events);
+    this._button = ensureElement<HTMLButtonElement>('.button', this.container);
+ if (this._button) {
+            this._button.addEventListener('click', () => {
+                events.emit('success:open');
+            });
+        };
     }
 
     set email(value: string) {
@@ -38,4 +58,5 @@ export class Order extends Form<IOrder> {
     set phone(value: string) {
         (this.container.elements.namedItem('phone') as HTMLInputElement).value = value;
     }
+
 }

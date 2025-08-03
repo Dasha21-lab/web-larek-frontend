@@ -91,11 +91,14 @@ export class ShopData implements IShopsData {
     setOrderField(field: keyof OrderField, value: string) {
         this._order[field] = value;
 
-        if (this.validateOrder()) {
+        const isValid = this.validateOrder();
+
+        if (isValid) {
             this.events.emit('order:ready', this._order);
         }
-        
     }
+
+
 
     /*
     validateOrder() {
@@ -125,22 +128,47 @@ export class ShopData implements IShopsData {
         */
 
     
-    validateOrder() {
-        const errors: typeof this.formErrors = {};
+    // validateOrder() {
+    //     const errors: typeof this.formErrors = {};
 
-        if (!this._order.payment) {
+    //     if (!this._order.payment) {
+    //         errors.payment = 'Необходимо указать способ оплаты';
+    //     }
+
+    //     if (!this._order.address) {
+    //         errors.address = 'Необходимо указать адрес';
+    //     }
+
+    //     if (!this._order.email) {
+    //         errors.email = 'Необходимо указать email';
+    //     }
+
+    //     if (!this._order.phone) {
+    //         errors.phone = 'Необходимо указать телефон';
+    //     }
+
+    //     this.formErrors = errors;
+    //     this.events.emit('formErrors:change', this.formErrors);
+    //     return Object.keys(errors).length === 0;
+    // }
+
+        validateOrder() {
+        const errors: typeof this.formErrors = {};
+        const { payment, address, email, phone } = this._order;
+
+        if (!payment) {
             errors.payment = 'Необходимо указать способ оплаты';
         }
 
-        if (!this._order.address) {
+        if (!address) {
             errors.address = 'Необходимо указать адрес';
         }
 
-        if (!this._order.email) {
+        if (!email) {
             errors.email = 'Необходимо указать email';
         }
 
-        if (!this._order.phone) {
+        if (!phone) {
             errors.phone = 'Необходимо указать телефон';
         }
 
@@ -149,9 +177,8 @@ export class ShopData implements IShopsData {
         return Object.keys(errors).length === 0;
     }
 
-
-    hasCardInBasket(item: ICard): boolean {
-        return this.basket.some(basketItem => basketItem.id === item.id);
+    hasCardInBasket(cardId: string): boolean {
+        return this.basket.some(basketItem => basketItem.id === cardId);
     }
 }
 
