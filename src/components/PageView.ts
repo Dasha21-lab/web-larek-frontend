@@ -1,13 +1,7 @@
-import { ICard } from "../../types";
-import { ensureElement } from "../../utils/utils";
-import { Component } from "../base/Component";
-import { IEvents } from "../base/events";
-
-interface IPage {
-    counter: number;
-    gallery: HTMLElement[];
-    locked: boolean;
-}
+import { IPage } from '../types/index';
+import { ensureElement } from '../utils/utils';
+import { Component } from '../components/base/Component';
+import { IEvents } from '../components/base/events';
 
 export class Page extends Component<IPage> {
     protected pageCounter: HTMLElement;
@@ -28,7 +22,7 @@ export class Page extends Component<IPage> {
         });
     }
 
-    set conter(value: number) {
+    set counter(value: number) {
         this.setText(this.pageCounter, String(value));
     }
 
@@ -42,5 +36,5 @@ export class Page extends Component<IPage> {
         } else {
             this.pageWrapper.classList.remove('page__wrapper_locked');
         }
-    } 
+    }
 }

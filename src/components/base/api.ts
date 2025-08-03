@@ -7,10 +7,12 @@ export type ApiListResponse<Type> = {
 
 export class Api implements IShopApi {
     readonly baseUrl: string;
+    readonly cdnUrl: string;
     protected options: RequestInit;
 
-    constructor(baseUrl: string, options: RequestInit = {}) {
+    constructor(baseUrl: string, cdnUrl: string, options: RequestInit = {}) {
         this.baseUrl = baseUrl;
+        this.cdnUrl = cdnUrl;
         this.options = {
             headers: {
                 'Content-Type': 'application/json',
