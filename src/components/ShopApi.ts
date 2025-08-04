@@ -1,4 +1,4 @@
-import { IShopApi, ICard, ICards, IOrder, IOrderResult } from '../types';
+import { IShopApi, ICard, ICards, IOrderData, IOrderResult } from '../types';
 
 export class ShopApi {
     private _baseApi: IShopApi;
@@ -17,7 +17,7 @@ export class ShopApi {
             .then((item: ICard) => item);
     }
 
-    orderCards(order: IOrder): Promise<IOrderResult> {
+    orderCards(order: IOrderData): Promise<IOrderResult> {
         return this._baseApi.post<IOrderResult>(`/order`, order)
             .then((res: IOrderResult) => res);
     }

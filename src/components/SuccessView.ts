@@ -4,17 +4,19 @@ import { ensureElement } from '../utils/utils';
 import { IEvents } from './base/events';
 
 export class Success extends Component<IOrderResult> {
-    protected succesButton: HTMLButtonElement;
+    protected events: IEvents;
+    protected successButton: HTMLButtonElement;
     protected descriptionTotal: HTMLElement;
 
-    constructor(container: HTMLElement, protected events: IEvents) {
+    constructor(container: HTMLElement, events: IEvents) {
         super(container);
+        this.events = events;
 
-        this.succesButton = ensureElement<HTMLButtonElement>('.order-success__close', this.container);
+        this.successButton = ensureElement<HTMLButtonElement>('.order-success__close', container);
         this.descriptionTotal = ensureElement<HTMLElement>('.order-success__description', this.container);
 
-        this.succesButton.addEventListener('click', () => {
-            this.events.emit('modal:close');
+        this.successButton.addEventListener('click', () => {
+            this.events.emit('success:close');
         });
     }
 

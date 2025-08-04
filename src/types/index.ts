@@ -1,5 +1,4 @@
-import { API_URL } from "../utils/constants";
-
+// Интерфейс карточки товара
 export interface ICard {
     id: string;
     description?: string;
@@ -7,76 +6,83 @@ export interface ICard {
     title: string;
     category?: string;
     price: number | null;
+    inBasket?: boolean;
 }
 
+// Интерфейс отображение главной страницы
 export interface IPage {
     counter: number;
     gallery: ICard[];
     locked: boolean;
 }
 
+// Интерфейс отображение корзины
 export interface IBasket {
-    items: HTMLElement[];
+    items: ICard[];
     total: number;
-    selected: string[];
 }
 
+// Интерфейс ответа API для списка товаров
 export interface ICards {
     total: number;
-    items: ICard[]
+    items: ICard[];
 }
 
+// Интерфейс модели данных магазина
 export interface IShopsData {
     cards: ICard[];
     basket: ICard[];
     preview: string | null;
-    order: IOrder | null;
-    // getCard(cardId: string): ICard;
+    order: IOrderData | null;
+    getCard(cardId: string): ICard | undefined;
+    hasCardInBasket(cardId: string): boolean;
     setCards(items: ICard[]): void;
-    addBasket(card: ICard): void;
+    addBasket(card: ICard): boolean;
     removeBasket(card: ICard): void;
     setOrderField(field: keyof OrderField, value: string): void;
     getTotal?(): number;
 }
 
-// // производный тип способ оплаты
-// export type PaymentMethod = 'online' | 'upon receipt';
-
+// Интерфейс статуса заказа (валидации)
 export interface IOrderStatus {
     status: boolean;
     message: string;
 }
 
-export interface IDelivery {
+// Интерфейс отображение оплаты
+export interface IOrder {
     payment: string;
     address: string;
 }
 
+// Интерфейс отображение контактов
 export interface IContact {
     email: string;
     phone: string;
 }
 
+// Интерфейс результата оформления заказа
 export interface IOrderResult {
-    id: string;
+    id?: string;
+    total?: number;
+}
+
+// Объединенный тип для полей заказа и контактов
+export type OrderField = IOrder & IContact;
+
+// Полный интерфейс данных заказа
+export interface IOrderData extends OrderField {
+    items: string[];
     total: number;
 }
 
-export type OrderField = IDelivery & IContact;
+// Тип для ошибок формы
+export type FormErrors = Partial<Record<keyof IOrderData, string>>;
 
-// // производный тип форм оплаты и контактов
-// export type OrderForm = Pick<UserData, 'address' | 'email' | 'phone'>
-
-export interface IOrder extends OrderField {
-    items: string[]
-}
-
-export type FormErrors = Partial<Record<keyof IOrder, string>>;
-
-export type CardBasket = Pick<ICard, 'id' | 'title' | 'price'>
-
+// Тип для HTTP методов POST, PUT, DELETE
 export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 
+// Интерфейс API магазина
 export interface IShopApi {
     baseUrl: string;
     cdnUrl: string;

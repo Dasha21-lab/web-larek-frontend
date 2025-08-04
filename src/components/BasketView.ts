@@ -16,12 +16,10 @@ export class Basket extends Component<IBasket> {
         this.basketList = ensureElement<HTMLElement>('.basket__list', this.container);
         this.basketTotal = container.querySelector('.basket__price');
         this.basketButton = container.querySelector('.basket__button');
-        
-        if (this.basketButton) {
-            this.basketButton.addEventListener('click', () => {
-                events.emit('order:open');
-            });
-        };
+
+        this.basketButton.addEventListener('click', () => {
+            events.emit('order:open');
+        });
 
         this.items = [];
     }
@@ -34,20 +32,12 @@ export class Basket extends Component<IBasket> {
                 createElement<HTMLParagraphElement>('p', {
                     textContent: 'Корзина пуста'
             }));
-
         };
 
-        this.basketButton.disabled = items.length 
-            ? false 
+        this.setEnabled(this.basketButton, items.length > 0);
+        this.basketButton.disabled = items.length
+            ? false
             : true;
-    }
-
-    set selected(items: string[]) {
-        if (items.length) {
-            this.setEnabled(this.basketButton, false);  
-        } else {
-            this.setEnabled(this.basketButton, true);  
-        }
     }
 
     set total(total: number) {

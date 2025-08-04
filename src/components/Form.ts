@@ -1,10 +1,9 @@
-import { ensureElement } from "../utils/utils";
-import { Component } from "./base/Component";
-import { IEvents } from "./base/events";
+import { ensureElement } from '../utils/utils';
+import { Component } from '../components/base/Component';
+import { IEvents } from '../components/base/events'
 
 interface IForm {
     valid: boolean;
-    errors: string[];
 }
 
 export class Form<T> extends Component<IForm> {
@@ -28,21 +27,17 @@ export class Form<T> extends Component<IForm> {
             const target = event.target as HTMLInputElement;
             const field = target.name as keyof T;
             const value = target.value;
-            
+
             this.emitFieldChangeEvent(field, value);
         });
     }
 
     set valid(value: boolean) {
-        // this.submitButton.disabled = !value;
-        if (!value) {
- this.setEnabled(this.submitButton, false); 
-        }
-         
+        this.submitButton.disabled = !value;
     }
 
-    set errors(value: string) {
-        this.setText(this.formErrors, value)
+    set error(value: string) {
+        this.setText(this.formErrors, value);
     }
 
     protected emitFieldChangeEvent(field: keyof T, value: string) {
@@ -52,8 +47,8 @@ export class Form<T> extends Component<IForm> {
     }
 
     render(state: Partial<T> & IForm) {
-        const {valid, errors, ...inputs} = state;
-        super.render({ valid, errors });
+        const {valid, ...inputs} = state;
+        super.render({ valid });
         Object.assign(this, inputs);
         return this.container;
     }

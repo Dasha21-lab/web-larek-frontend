@@ -14,9 +14,9 @@ export class Card extends Component<ICard> {
     protected cardDescription?: HTMLElement;
     protected cardButton?: HTMLButtonElement;
     protected cardDeleteButton?: HTMLButtonElement;
-     protected inBasket: boolean = false; 
+    protected cardInBasket?: boolean;
 
-    constructor(container: HTMLTemplateElement, events: IEvents) {
+    constructor(container: HTMLElement, events: IEvents) {
         super(container);
         this.events = events;
 
@@ -31,19 +31,17 @@ export class Card extends Component<ICard> {
 
         if (this.cardButton) {
             this.cardButton.addEventListener('click', () =>
-                this.events.emit('card:add', this)
+                this.inBasket
+                    ? this.handleRemove()
+                    : this.events.emit('card:add', this)
             );
         }
-        
-        if (this.cardDeleteButton) {
-            this.cardDeleteButton.addEventListener('click', () => {
-                this.events.emit('card:remove', this)
-            });
-        } else {
-            this.container.addEventListener('click', () => {
-                this.events.emit('card:select', this)
-            });
-        }
+
+        this.cardDeleteButton
+            ? this.cardDeleteButton.addEventListener('click', () =>
+                this.handleRemove())
+            : this.container.addEventListener('click', () =>
+                this.events.emit('card:select', this))
     }
 
     set id(value: string) {
@@ -79,40 +77,58 @@ export class Card extends Component<ICard> {
             this.setText(this.cardCategory, value);
         }
     }
-    
+
     get category(): string {
         return this.cardCategory?.textContent || '';
     }
 
     set price(value: number | null) {
-        if(value === null) {
-            this.setText(this.cardPrice, 'Бесценно');
-            this.updateButton(false, 'Недоступно');
-        } else {
-            this.setText(this.cardPrice, `${value} синапсов`);
-            this.updateButton(true, 'Купить');
-        }
+        value === null
+            ? this.setText(this.cardPrice, 'Бесценно')
+            : this.setText(this.cardPrice, `${value} синапсов`);
     }
+
     get price(): number | null {
         const text = this.cardPrice?.textContent;
 
         if (text === 'Бесценно') return null;
         return Number(text?.replace(' синапсов', '')) || null;
     }
-   
+
+    set inBasket(value: boolean) {
+        if (this.price === null) {
+            this.updateButtonState(false, 'Недоступно');
+            return;
+        }
+
+        const content = value
+            ? 'Удалить из корзины'
+            : 'Купить';
+
+        this.cardInBasket = value;
+        this.updateButtonState(true, content);
+    }
+
+    get inBasket(): boolean {
+        return this.cardInBasket;
+    }
+
     setCardIndex(index: number): void {
         if (this.cardIndex) {
             this.cardIndex.textContent = index.toString();
         }
     }
 
-    protected updateButton(enabled: boolean, text: string): void {
+    protected handleRemove() {
+        this.events.emit('card:remove', this);
+    }
+
+    protected updateButtonState(enabled: boolean, text: string): void {
         if (!this.cardButton) return;
 
         this.setText(this.cardButton, text);
         this.setEnabled(this.cardButton, !enabled);
-            
+
         this.toggleClass(this.cardButton, 'card__button_disabled', !enabled);
     }
-
 }

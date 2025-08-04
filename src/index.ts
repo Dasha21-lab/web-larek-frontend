@@ -1,5 +1,5 @@
-import { EventEmitter, IEvents } from './components/base/events';
-import { ICard, IShopsData, IOrder, IOrderResult, IShopApi, ICards, IDelivery, IOrderStatus, FormErrors } from './types/index';
+import { EventEmitter } from './components/base/events';
+import { ICard, IOrder, IShopApi, IOrderData, IOrderStatus, IContact } from './types/index';
 import { Api } from './components/base/api';
 import { ShopData } from './components/ShopData';
 import { Card } from '../src/components/CardView';
@@ -10,7 +10,7 @@ import './scss/styles.scss';
 import { Page } from '../src/components/PageView';
 import { Modal } from '../src/components/ModalView'
 import { Basket } from './components/BasketView';
-import { Delivery, Contact } from './components/OrderView';
+import { Order, Contact } from './components/OrderView';
 import { Success } from './components/SuccessView';
 
 // Инициализация событий и API
@@ -29,14 +29,15 @@ const contactsTemplate = ensureElement<HTMLTemplateElement>('#contacts');
 const successTemplate = ensureElement<HTMLTemplateElement>('#success');
 
 // Инициализация компонентов
-const cardsData = new ShopData(events);
+const shopData = new ShopData(events);
 const page = new Page(document.body, events);
 const modal = new Modal(modalContainer, events);
 const basket = new Basket(cloneTemplate(basketTemplate), events);
-const order = new Delivery(cloneTemplate(orderTemplate), events)
+const order = new Order(cloneTemplate(orderTemplate), events)
 const contacts = new Contact(cloneTemplate(contactsTemplate), events);
 const success = new Success(cloneTemplate(successTemplate), events);
 
+// Логирование всех событий
 events.onAll(({ eventName, data }) => {
     console.log(eventName, data);
 });
@@ -44,7 +45,7 @@ events.onAll(({ eventName, data }) => {
 // Загрузка данных с сервера
 api.getCardList()
   .then((cards) => {
-    cardsData.setCards(cards.items);
+    shopData.setCards(cards.items);
   })
   .catch((err) => {
     console.error(err);
@@ -52,9 +53,19 @@ api.getCardList()
 
 // Обработчики событий
 
+// Управление модальными окнами - открытие
+events.on('modal:open', () => {
+  page.locked = true;
+});
+
+// Управление модальными окнами - закрытие
+events.on('modal:close', () => {
+  page.locked = false;
+});
+
 // Обновление каталога товаров
 events.on<ShopData>('items:updated', () => {
-  page.gallery = cardsData.cards.map((item) => {
+  page.gallery = shopData.cards.map((item) => {
     const catalog = new Card(cloneTemplate(cardCatalogemplate), events);
     return catalog.render({
       id: item.id,
@@ -68,12 +79,13 @@ events.on<ShopData>('items:updated', () => {
 
 // Просмотр товара
 events.on('card:select', (item: Card) => {
-  cardsData.preview = item.id;
+  shopData.preview = item.id;
 });
 
-events.on('card:selected', (item: Card) => {
+// Отображение детальной информации о товаре
+events.on('card:selected', (item: ICard) => {
   const cardPreview = new Card(cloneTemplate(cardPreviewTemplate), events);
-  
+
   modal.render({
     content: cardPreview.render({
       id: item.id,
@@ -82,18 +94,9 @@ events.on('card:selected', (item: Card) => {
       image: `${CDN_URL}${item.image}`,
       price: item.price,
       category: item.category,
+      inBasket: shopData.hasCardInBasket(item.id)
     })
   });
-});
-
-// Управление модальными окнами - открытие
-events.on('modal:open', () => {
-    page.locked = true;
-});
-
-// Управление модальными окнами - закрытие
-events.on('modal:close', () => {
-    page.locked = false;
 });
 
 // открытие корзины
@@ -103,34 +106,35 @@ events.on('basket:open', () => {
   });
 });
 
+// Добавление товара в корзину
 events.on('card:add', (item: Card) => {
-  // Добавляем товар в корзину
-  cardsData.addBasket(item);
-  page.counter = cardsData.basketCount;
+  item.inBasket = shopData.addBasket(item);
 
-  // Обновляем отображение корзины
-  basket.items = cardsData.basket.map((basketItem, index) => {
+  page.counter = shopData.basketCount;
+
+  basket.items = shopData.basket.map((basketItem, index) => {
       const cardBasket = new Card(cloneTemplate(cardBasketTemplate), events);
       const cardElement = cardBasket.render({
         id: basketItem.id,
         title: basketItem.title,
         price: basketItem.price
       });
-      
-      // Устанавливаем номер позиции (начинаем с 1)
+
       cardBasket.setCardIndex(index + 1);
       return cardElement;
   });
 
-  // Обновляем общую сумму
-  basket.total = cardsData.getTotal();
+  basket.total = shopData.getTotal();
 });
 
+// Удаление товара из корзины
 events.on('card:remove', (item: Card) => {
-  cardsData.removeBasket(item);
-  page.counter = cardsData.basketCount;
+  shopData.removeBasket(item);
+
+  page.counter = shopData.basketCount;
 });
 
+// Обновление корзины после удаления товара
 events.on('basket:remove', (items: Card[]) => {
   basket.items = items.map((basketItem, index) => {
     const cardBasket = new Card(cloneTemplate(cardBasketTemplate), events);
@@ -145,80 +149,86 @@ events.on('basket:remove', (items: Card[]) => {
     return cardElement;
   });
 
-  basket.total = cardsData.getTotal();
+  basket.total = shopData.getTotal();
 });
 
+// Очистка корзины
+events.on('basket:reset', () => {
+  basket.items = [];
+  basket.total = shopData.getTotal();
+  page.counter = shopData.basketCount;
+});
+
+// Открытие формы оплата
 events.on('order:open', () => {
+  shopData.clearOrder();
+
   modal.render({
     content: order.render({
       payment: '',
       address: '',
-      valid: false,
-      errors: []
+      valid: false
     })
-  })
-})
-
-events.on('order:change', (data: { field: keyof IDelivery; value: string }) => { 
-  cardsData.setOrderField(data.field, data.value);
-})
-
-
-events.on('order:statusChange', (item: IOrderStatus) => { 
-  console.log(item)
-})
-  
-
-events.on('basket:clear', () => {
-    cardsData.clearBasket();
-    page.counter = 0;
+  });
 });
 
+// Обработка изменений в форме заказа
+events.on('order:change', (data: { field: keyof IOrder; value: string }) => {
+  shopData.setOrderField(data.field, data.value);
+});
+
+// Обработка изменения статуса заказа
+events.on('order:statusChange', (item: IOrderStatus) => {
+  order.valid = item.status;
+  order.error = item.message;
+});
+
+// Обработка изменений в форме контактов
+events.on('contacts:change', (data: { field: keyof IContact; value: string }) => {
+  shopData.setOrderField(data.field, data.value);
+});
+
+// Открытие формы контактов
 events.on('contacts:open', () => {
   modal.render({
     content: contacts.render({
       email: '',
       phone: '',
       valid: false,
-      errors: []
     })
-  })
-})
+  });
+});
 
-events.on('success:open', () => {
-  modal.render({
-    content: success.render({
+// Обработка изменения статуса контактов
+events.on('contacts:statusChange', (item: IOrderStatus) => {
+  contacts.valid = item.status;
+  contacts.error = item.message;
+});
+
+// Оформление заказа
+events.on('contacts:submit', () => {
+  const orderData: IOrderData = {
+    ...shopData.order,
+    total: shopData.getTotal(),
+    items: shopData.basket.map(item => item.id)
+  };
+
+  api.orderCards(orderData)
+    .then((res) => {
+      shopData.clearBasket()
+
+      modal.render({
+          content: success.render({
+            total: res.total,
+          })
+      });
     })
-  })
-})
+    .catch((error) => {
+      console.error(error);
+    })
+});
 
-
-
-// events.on('formErrors:change', ())
-// events.on('order:submit', () => {
-//   if (cardsData.validateOrder()) {
-//     events.emit();
-//   } else {
-//     events.emit('formErrors:change', cardsData.formErrors)
-//   }
-// })
-
-// events.on('order:submit', () => {
-// 	modal.render({
-// 		content: contacts.render({
-// 			phone: '',
-// 			email: '',
-// 			valid: false,
-// 			errors: [],
-// 		}),
-// 	});
-// });
-
-
-
-
-
-
-
-
-
+// Закрытие окна успешного оформления
+events.on('success:close', () => {
+  modal.close()
+});

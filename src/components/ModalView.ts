@@ -1,7 +1,6 @@
-
 import { ensureElement } from '../utils/utils';
-import { Component } from './base/Component';
-import { IEvents } from './base/events';
+import { Component } from '../components/base/Component';
+import { IEvents } from '../components/base/events';
 
 interface IModal {
     content: HTMLElement;
@@ -44,23 +43,3 @@ export class Modal extends Component<IModal> {
         return this.container;
     }
 }
-
-// if(this.modalActionsButton) {
-        // this.modalActionsButton.addEventListener('click', (event: Event) => {
-        //     event.preventDefault();
-        //      const modalType = this.getModalName();
-        //     this.events.emit(`${modalType}:open`);
-           
-        // })
-        // }
-
-        // protected getModalName(): string {
-    //     if (this.container.querySelector('.basket')) {
-    //         return 'basket';
-    //     } else if (this.container.querySelector('.order')) {
-    //         return 'order';
-    //     } else if (this.container.querySelector('.contacts')) {
-    //         return 'contacts';
-    //     }
-    //     return 'modal';
-    // }

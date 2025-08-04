@@ -12,10 +12,10 @@ export class Page extends Component<IPage> {
     constructor(container: HTMLElement, protected events: IEvents) {
         super(container);
 
-        this.pageCounter = ensureElement<HTMLElement>('.header__basket-counter');
-        this.pageGallery = ensureElement<HTMLElement>('.gallery');
-        this.pageBasket = ensureElement<HTMLElement>('.header__basket');
-        this.pageWrapper = ensureElement<HTMLElement>('.page__wrapper');
+        this.pageCounter = ensureElement<HTMLElement>('.header__basket-counter', container);
+        this.pageGallery = ensureElement<HTMLElement>('.gallery', container);
+        this.pageBasket = ensureElement<HTMLElement>('.header__basket', container);
+        this.pageWrapper = ensureElement<HTMLElement>('.page__wrapper', container);
 
         this.pageBasket.addEventListener('click', () => {
             this.events.emit('basket:open');
