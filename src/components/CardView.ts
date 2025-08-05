@@ -1,7 +1,8 @@
 import { IEvents } from '../components/base/events';
 import { ICard } from '../types/index';
 import { Component } from '../components/base/Component';
-import { ensureElement } from '../utils/utils'
+import { ensureElement } from '../utils/utils';
+import { categoryCards } from '../utils/constants'
 
 export class Card extends Component<ICard> {
     protected events: IEvents;
@@ -75,6 +76,7 @@ export class Card extends Component<ICard> {
     set category(value: string) {
        if (this.cardCategory) {
             this.setText(this.cardCategory, value);
+            this.cardCategory.classList.add(categoryCards[value]);
         }
     }
 

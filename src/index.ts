@@ -108,34 +108,16 @@ events.on('basket:open', () => {
 
 // Добавление товара в корзину
 events.on('card:add', (item: Card) => {
-  item.inBasket = shopData.addBasket(item);
-
-  page.counter = shopData.basketCount;
-
-  basket.items = shopData.basket.map((basketItem, index) => {
-      const cardBasket = new Card(cloneTemplate(cardBasketTemplate), events);
-      const cardElement = cardBasket.render({
-        id: basketItem.id,
-        title: basketItem.title,
-        price: basketItem.price
-      });
-
-      cardBasket.setCardIndex(index + 1);
-      return cardElement;
-  });
-
-  basket.total = shopData.getTotal();
+  shopData.addBasket(item);
 });
 
 // Удаление товара из корзины
 events.on('card:remove', (item: Card) => {
   shopData.removeBasket(item);
-
-  page.counter = shopData.basketCount;
 });
 
-// Обновление корзины после удаления товара
-events.on('basket:remove', (items: Card[]) => {
+events.on('basket:change', (items: Card[]) => {
+  page.counter = shopData.basketCount;
   basket.items = items.map((basketItem, index) => {
     const cardBasket = new Card(cloneTemplate(cardBasketTemplate), events);
 

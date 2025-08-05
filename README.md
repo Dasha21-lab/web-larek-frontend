@@ -154,7 +154,7 @@ export interface IShopApi {
 
 ```
 export interface IOrderData extends OrderField {
-    items: string[];
+    items?: string[];
     total: number;
 }
 ```
@@ -226,6 +226,7 @@ export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 - getTotal(): number - считает общую стоимость товаров в корзине.
 - hasCardInBasket(cardId: string): boolean - проверяет, есть ли товар в корзине.
 - setOrderField(field: keyof OrderField, value: string): void - устанавливает значение поля (адрес, email и т.д.).
+- emitBasketChange(): void - метод который хранит в себе событие.
 - validateOrder() - проверяет заполнение полей заказа (адрес, способ оплаты).
 - validateContacts() - проверяет заполнение контактных данных (телефон, email).
 - validateOrderField() - запускает обе валидации (заказ + контакты).
@@ -410,7 +411,7 @@ export type ApiPostMethods = 'POST' | 'PUT' | 'DELETE';
 *События изменения данных (генерируются классами моделями данных)*
 - 'items:updated' - событие обновления массива товаров.
 - 'card:selected' - событие изменения выбранной карточки товара для отображения в модальном окне.
-- 'basket:remove' - событие удаления товара из корзины.
+- 'basket:change' - событие изменение товара в корзине.
 - 'basket:reset' - событие полной очистки корзины.
 - 'order:statusChange' - событие изменения статуса заказа.
 - 'contacts:statusChange' - событие изменения статуса контактных данных контактов.

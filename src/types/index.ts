@@ -72,7 +72,7 @@ export type OrderField = IOrder & IContact;
 
 // Полный интерфейс данных заказа
 export interface IOrderData extends OrderField {
-    items: string[];
+    items?: string[];
     total: number;
 }
 

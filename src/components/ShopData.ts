@@ -10,7 +10,6 @@ export class ShopData implements IShopsData {
         address: '',
         email: '',
         phone: '',
-        items: [],
         total: 0
     };
     formErrors: FormErrors = {};
@@ -73,6 +72,7 @@ export class ShopData implements IShopsData {
     addBasket(card: ICard): boolean {
         if (!this._basket.some(item => item.id === card.id)) {
             this._basket.push(card);
+            this.emitBasketChange();
             return true;
         }
 
@@ -85,20 +85,23 @@ export class ShopData implements IShopsData {
             address: '',
             email: '',
             phone: '',
-            items: [],
-            total: 0,
+            total: 0
         };
     }
 
     removeBasket(card: ICard): void {
         this._basket = this._basket.filter(item => item.id !== card.id);
-        this.events.emit('basket:remove', this._basket);
+        this.emitBasketChange();
     }
 
     getTotal(): number {
         return this._basket.reduce((total, card) => {
             return total + (card.price || 0);
         }, 0);
+    }
+
+    protected emitBasketChange(): void {
+        this.events.emit('basket:change', this._basket);
     }
 
     hasCardInBasket(cardId: string): boolean {
